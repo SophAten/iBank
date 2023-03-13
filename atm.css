@@ -1,0 +1,119 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body{
+  background-color: #163d49;
+}
+
+input {
+  cursor: pointer;
+}
+
+.container {
+  width: 100vw;
+  height: 120vh;
+  display: grid;
+  place-items: center;
+  background-color: #163d49;
+}
+
+.row {
+  width: 400px;
+  height: 700px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.col {
+  height: 500px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.display {
+  box-shadow: 0 0 0 35px #286e84, 0 0 0 45px #5eb3ce, inset 0 0 10px rgba(0, 0, 0, 1), 0 5px 20px rgba(0, 0, 0, .5), inset 0 0 15px rgba(0, 0, 0, .2);
+  width: 100%;
+}
+
+.message {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.message p {
+  font-size: 25px;
+  color: #fff;
+  margin: 5px;
+  font-family: "Myriad Black";
+}
+
+#message2 {
+  color: green;
+}
+
+.exit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 20px;
+  color: #163d49;
+  font-family: "Myriad Black";
+  margin: 5px;
+}
+
+.btn {
+  width: 85px;
+  height: 40px;
+  margin: 5px;
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  font-size: 20px;
+  transform: translateX(-50%);
+  font-family: "Myriad Black";
+}
+
+.field {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Myriad Black";
+  border: none;
+  background-color: #163d49;
+  color: green;
+  font-size: 30px;
+  border-bottom: 4px solid black;
+}
+
+.select {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.back{
+  margin: 1em;
+  display: flex;
+  flex-direction: row;
+}
+
+.backbutton{
+  color: white;
+  font-size: 20px;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}

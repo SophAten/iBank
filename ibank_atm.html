@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>iBank Atm</title>
+  <script src="https://kit.fontawesome.com/f5a75fbd23.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="atm.css">
+</head>
+
+<body>
+  <div class="back">
+    <br>
+    &nbsp;&nbsp; <a href="first.html" class="backbutton"> <i class="fa-solid fa-arrow-left-long fa-lg"></i>&nbsp;&nbsp; Back </a>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col display">
+        <h3>Welcome to the iBank ATM</h3>
+        <div class="message">
+          <p id="message2"></p>
+          <p id="message">Please swipe your card (enter your email)</p>
+        </div>
+        <div id="select" class="select">
+          <select placeholder="Account Name" name="account_name" id="account_name" required>
+            <option disabled hidden selected>Account Name</option>
+          </select>
+        </div>
+        <form method="post">
+          <input type="text" name="num" id="num" class="field" />
+          <input type="button" value="Enter" onclick="card_check()" id="enter" class="btn">
+          <input type="button" value="Log Out" onclick="exit()" class="exit">
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    var selected_account_number = 0;
+    var total_balance = parseInt(5000);
+    //var account_name_array = ['Account1', 'Account2', 'Account3']
+    var email;
+    var pin_num;
+
+    function ajaxcall() {
+      // (B1) GET FORM DATA
+      var data = new FormData();
+      data.append('email', email);
+      data.append('pin', pin_num);
+      //document.write(email+" "+pin_num);
+      // (B2) AJAX CALL
+      var result = "0";
+      var xhr = new XMLHttpRequest();
+
+      xhr.open("GET", "atm_login.php?status="+1+"&email="+email+"&pin="+pin_num);
+      xhr.onload = function () {
+        result = this.response;
+        console.log("Database returned "+typeof result+" = "+result);
+        if (result == "0") {
+          document.getElementById('message').innerHTML = "Please enter a valid pin number";
+          document.getElementById('message').style.color = "red";
+          document.getElementById('message2').innerHTML = "";
+        } else {
+
+          account_name_array = result.split(" ");
+          document.getElementById('enter').setAttribute("onclick", "account_name()");
+          var select_val = document.getElementById('account_name');
+          select_val.onchange = (event) => {
+            document.getElementById('num').value = event.target.value;
+            selected_account_number = event.target.value;
+            console.log(selected_account_number);
+          }
+
+          document.getElementById('message').innerHTML = "Select your account name";
+          document.getElementById('message').style.color = "white";
+          document.getElementById('num').value = "";
+          document.getElementById('message2').innerHTML = "";
+          document.getElementById('select').style.display = "block";
+          document.getElementById('account_name').innerHTML += '<option>' + account_name_array.join('</option><option>') + '</option>';
+        }
+      };
+      xhr.send(data);
+      setTimeout(()=>{
+        return result;
+      },500)
+
+
+    }
+
+
+    function card_check() {
+      document.getElementById('message').innerHTML = "Processing....";
+      email = document.getElementById('num').value;
+      if (email === "") {
+        document.getElementById('message').innerHTML = "Please enter a valid email";
+      } else {
+        document.getElementById('enter').setAttribute("onclick", "pin_check()");
+        document.getElementById('num').value = "";
+        document.getElementById('message').innerHTML = "Please enter your pin number";
+        document.getElementById('message').style.color = "white";
+        document.getElementById('message2').innerHTML = "";
+      }
+    }
+
+    function pin_check() {
+      document.getElementById('message').innerHTML = "Processing....";
+      pin_num = document.getElementById('num').value;
+      var account_name_array;
+      if (pin_num == "") {
+        document.getElementById('message').innerHTML = "Please enter a pin number";
+      } else {
+        var result = ajaxcall();
+        console.log(selected_account_number);
+      }
+    }
+
+
+    function account_name() {
+      if (account_name === "Account Name") {
+        document.getElementById('message').innerHTML = "Please select your account name";
+      } else {
+        document.getElementById('select').style.display = "none";
+        document.getElementById('enter').setAttribute("onclick", "withdraw()");
+        document.getElementById('num').value = "";
+        document.getElementById('message').innerHTML = "Enter an Amount to withdraw";
+        document.getElementById('message').style.color = "white";
+        console.log("selected account number = " + selected_account_number);
+        document.getElementById('message2').innerHTML = "Accessing current Balance...";
+        showbalance();
+        }
+
+    }
+
+    function showbalance(){
+      console.log("accessing the database...")
+      var data = new FormData();
+      data.append('number', selected_account_number);
+
+      // (B2) AJAX CALL
+      var result = 0;
+      var xhr = new XMLHttpRequest();
+
+      xhr.open("GET", "atm_login.php?status="+2+"&number="+selected_account_number);
+      xhr.onload = function () {
+        result = this.response;
+        console.log("Second Database call returned "+typeof result+" = "+result);
+        total_balance = result;
+
+        document.getElementById('message2').innerHTML = "Current Balance: " + total_balance;
+      }
+      xhr.send(data);
+      setTimeout(()=>{
+        console.log("returning the value from the DB"+result);
+        return result;
+      },500)
+      }
+
+    function withdraw() {
+      var num = parseInt(document.getElementById('num').value);
+      if (num === "" || num === 0 || isNaN(num)) {
+        document.getElementById('message').innerHTML = "Transaction Denied: Enter Amount to Withdraw";
+      } else {
+        if(num < 0){
+          document.getElementById('message').innerHTML = "Negative withdrawals are not allowed. Please don't try it again!";
+          //TODO: add log about suspicious behavior
+        }
+        if (num >= 1000) {
+          document.getElementById('message').innerHTML = "Transaction Denied: No Withdrawals over $1000";
+        } else if (total_balance > 0 && num <= total_balance) {
+          total_balance = total_balance - num;
+          document.getElementById('message2').innerHTML = "Current Balance: " + total_balance;
+          document.getElementById('num').value = "";
+          withdrawAjaxCall(num);
+        } else {
+          document.getElementById('message').innerHTML = "Transaction Denied: Insufficient Balance";
+        }
+      }
+    }
+
+    function withdrawAjaxCall(num){
+      console.log("accessing the database to change the balance...")
+      var data = new FormData();
+      data.append('number', num);
+      data.append('withdraw_amount', num);
+      // (B2) AJAX CALL
+      var result = 0;
+      var xhr = new XMLHttpRequest();
+
+      xhr.open("GET", "atm_login.php?status="+3+"&number="+selected_account_number+"&withdraw_amount="+num);
+      xhr.onload = function () {
+        result = this.response;
+        console.log("Third Database call returned "+typeof result+" = "+result);
+        total_balance = result;
+
+        document.getElementById('message2').innerHTML = "Current Balance: " + total_balance;
+      }
+      xhr.send(data);
+      setTimeout(()=>{
+        console.log("returning the value from the DB"+result);
+        return result;
+      },500)
+    }
+
+    function exit() {
+      document.getElementById('message').innerHTML = "Please swipe your card (enter your email)";
+      document.getElementById('enter').setAttribute("onclick", "card_check()");
+      document.getElementById('message2').innerHTML = "";
+      document.getElementById('num').value = "";
+      document.getElementById('account_name').innerHTML -= '<option>' + account_name_array.join('</option><option>') + '</option>';
+    }
+
+  </script>
+</body>
+
+</html>
